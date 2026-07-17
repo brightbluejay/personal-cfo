@@ -1,0 +1,43 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies and builds
+node_modules/
+.next/
+.turbo/
+out/
+dist/
+build/
+
+# Tests and reports
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# Local databases and private data
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+data/private/
+statements/
+uploads/private/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
+
+# Logs
+*.log
+npm-debug.log*
