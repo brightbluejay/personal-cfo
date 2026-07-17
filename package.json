@@ -1,0 +1,58 @@
+{
+  "name": "personal-cfo",
+  "version": "0.1.0",
+  "description": "A public-safe starter repository for a local-first personal finance assistant focused on cash-flow clarity and consumer-debt reduction.",
+  "private": true,
+  "scripts": {
+    "dev": "env -u TMP -u TEMP -u TMPDIR next dev",
+    "build": "env -u TMP -u TEMP -u TMPDIR next build --webpack",
+    "start": "env -u TMP -u TEMP -u TMPDIR next start",
+    "lint": "env -u TMP -u TEMP -u TMPDIR eslint .",
+    "typecheck": "env -u TMP -u TEMP -u TMPDIR tsc --noEmit",
+    "test": "env -u TMP -u TEMP -u TMPDIR vitest run",
+    "test:watch": "env -u TMP -u TEMP -u TMPDIR vitest",
+    "format:check": "env -u TMP -u TEMP -u TMPDIR prettier --check .",
+    "db:generate": "env -u TMP -u TEMP -u TMPDIR drizzle-kit generate",
+    "db:migrate": "env -u TMP -u TEMP -u TMPDIR drizzle-kit migrate",
+    "demo:reset": "env -u TMP -u TEMP -u TMPDIR node --import tsx src/db/reset.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "overrides": {
+    "postcss": "8.5.19"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.11.1",
+    "csv-parse": "^7.0.1",
+    "drizzle-orm": "^0.45.2",
+    "next": "^16.2.10",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "drizzle-kit": "^0.31.10",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.2.10",
+    "prettier": "^3.9.5",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
+  },
+  "allowScripts": {
+    "esbuild@0.18.20": true,
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.1": true,
+    "better-sqlite3@12.11.1": true,
+    "sharp@0.34.5": true,
+    "unrs-resolver@1.12.2": true
+  }
+}
