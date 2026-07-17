@@ -1,0 +1,4 @@
+date,event,description,amount,priority,certainty,can_reduce,notes
+2026-07-20,Household,Replacement appliance part,48.00,2,confirmed,yes,Fictional committed cost
+2026-07-27,Leisure,Community activity,65.00,3,estimated,yes,Fictional optional scenario
+2026-08-03,Annual cost,Professional membership renewal,120.00,2,confirmed,no,Fictional annual expense

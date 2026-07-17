@@ -1,0 +1,7 @@
+key,value,notes
+currency,GBP,Fictional demo uses pounds sterling
+planning_date,2026-07-15,Fictional planning date
+current_bank_balance,420.00,Fictional available current-account balance
+next_payday,2026-07-25,Fictional payday
+minimum_cash_buffer,250.00,Fictional protected buffer
+monthly_flexible_spending_cap,180.00,Fictional discretionary cap

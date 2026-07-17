@@ -1,0 +1,13 @@
+date,account,description,category,amount,essential,provenance,notes
+2026-07-02,Demo Current,NORTH MARKET 0412,Groceries,-54.28,yes,seed,Fictional merchant
+2026-07-03,Demo Current,METRO PASS,Transport,-42.00,yes,seed,Fictional merchant
+2026-07-04,Demo Current,STREAM HOUSE,Subscriptions,-11.99,no,seed,Fictional merchant
+2026-07-05,Demo Current,GREEN KITCHEN,Food out,-28.60,no,seed,Fictional merchant
+2026-07-06,Demo Current,NORTH MARKET 0412,Groceries,-36.14,yes,seed,Fictional merchant
+2026-07-08,Demo Current,CITY ENERGY,Utilities,-92.40,yes,seed,Fictional merchant
+2026-07-09,Demo Current,ORBIT CARD PAYMENT,Debt payment,-112.00,yes,seed,Fictional provider
+2026-07-10,Demo Current,ACORN HOME,Household,-64.75,yes,seed,Fictional merchant
+2026-07-11,Demo Current,RIVER BOOKS,Leisure,-18.50,no,seed,Fictional merchant
+2026-07-12,Demo Current,DEMO PAYROLL,Income,3150.00,yes,seed,Fictional income
+2026-07-13,Demo Current,HARBOUR LOAN,Debt payment,-226.00,yes,seed,Fictional provider
+2026-07-14,Demo Current,MAPLE FINANCE,Debt payment,-75.00,yes,seed,Fictional provider

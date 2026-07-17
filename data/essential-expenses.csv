@@ -1,0 +1,6 @@
+due_date,category,description,amount,priority,certainty,paid,notes
+2026-07-18,Housing,Home payment,980.00,1,confirmed,no,Fictional recurring cost
+2026-07-19,Utilities,Energy and water,165.00,1,confirmed,no,Fictional recurring cost
+2026-07-20,Food,Groceries until payday,115.00,1,confirmed,no,Fictional estimate
+2026-07-21,Transport,Essential travel,62.00,1,confirmed,no,Fictional estimate
+2026-07-22,Insurance,Household insurance,38.00,1,confirmed,no,Fictional recurring cost

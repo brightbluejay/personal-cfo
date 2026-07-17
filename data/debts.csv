@@ -1,0 +1,4 @@
+name,type,balance,apr_percent,minimum_payment,payment_due_date,promo_apr_percent,promo_end_date,post_promo_apr_percent,priority_notes
+Orbit Card,credit_card,3650.00,24.90,112.00,2026-07-23,,,24.90,Fictional revolving balance
+Harbour Loan,personal_loan,7200.00,8.40,226.00,2026-07-24,,,8.40,Fictional fixed loan
+Maple Finance,retail_finance,1850.00,0.00,75.00,2026-07-24,0.00,2027-01-31,29.90,Fictional promotional balance
