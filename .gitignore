@@ -41,3 +41,7 @@ __pycache__/
 # Logs
 *.log
 npm-debug.log*
+
+# Generated finance reports
+reports/*
+!reports/.gitkeep
