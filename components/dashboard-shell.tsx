@@ -6,7 +6,7 @@ const navigation = [
   { href: "/transactions", label: "Transactions", marker: "02" },
   { href: "/spending", label: "Spending", marker: "03" },
   { href: "/debts", label: "Debts", marker: "04" },
-  { href: "/monthly-review", label: "Monthly Review", marker: "05" },
+  { href: "/monthly-review", label: "Your Action Plan", marker: "05" },
 ];
 
 export function DashboardShell({ children }: { children: ReactNode }) {
@@ -28,13 +28,10 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                   Personal CFO
                 </span>
                 <span className="block text-xs text-[var(--muted)]">
-                  Fictional demo
+                  Cash-flow planner
                 </span>
               </span>
             </Link>
-            <span className="rounded-full border border-[var(--sage)] bg-[var(--sage-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sage-dark)] lg:mt-8 lg:inline-block">
-              Local only
-            </span>
           </div>
 
           <nav
@@ -60,12 +57,17 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               Product rule
             </p>
             <p className="mt-3 text-sm leading-6">
-              Code calculates. GPT interprets. You decide.
+              Know what is safe. Clear what you owe.
             </p>
           </div>
         </aside>
 
         <main className="min-w-0 px-5 py-7 sm:px-8 lg:px-10 lg:py-9 xl:px-14">
+          <div className="mb-6 rounded-xl border border-[var(--sage)] bg-[var(--sage-soft)] px-4 py-3 text-sm leading-6 text-[var(--sage-dark)]">
+            <strong>Demo using fictional financial data.</strong> A future
+            private version will support statement imports and secure bank
+            connections. Please do not enter real financial information here.
+          </div>
           {children}
         </main>
       </div>

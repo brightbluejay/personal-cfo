@@ -3,7 +3,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Personal CFO — Fictional Demo",
+  title: "Personal CFO",
   description: "A local-first cash-flow and consumer-debt planning demo.",
 };
 

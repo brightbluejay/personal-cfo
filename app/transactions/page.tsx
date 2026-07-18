@@ -1,9 +1,6 @@
-import {
-  EmptyState,
-  PageHeader,
-  SectionCard,
-  StatusPill,
-} from "@/components/ui";
+import { PositionSummary } from "@/components/position-summary";
+import { EmptyState, PageHeader, SectionCard } from "@/components/ui";
+import { getCfoWorkspace } from "@/src/db/cfo-query";
 import { getDashboardData } from "@/src/db/queries";
 import { formatDate, formatMoney } from "@/src/lib/format";
 
@@ -11,15 +8,26 @@ export const dynamic = "force-dynamic";
 
 export default function TransactionsPage() {
   const { transactions } = getDashboardData();
+  const cfo = getCfoWorkspace();
+  const movementLabels: Record<string, string> = {
+    expense: "Purchase",
+    income: "Income",
+    internal_transfer: "Internal transfer",
+    savings_transfer: "Savings transfer",
+    debt_payment: "Debt payment",
+    refund: "Refund",
+    adjustment: "Adjustment",
+    unknown: "Needs review",
+  };
   return (
     <>
       <PageHeader
-        eyebrow="Local ledger"
+        eyebrow="Account activity"
         title="Transactions"
-        description="Fictional ledger entries with deterministic fixture categories and their provenance."
-        action={<StatusPill>{transactions.length} records</StatusPill>}
+        description="Purchases, income and transfers are kept in one timeline. Transfers between your own accounts are not counted as spending."
       />
-      <SectionCard title="Seeded activity" eyebrow="Newest first">
+      {cfo ? <PositionSummary forecast={cfo.forecast} /> : null}
+      <SectionCard title="Recent activity" eyebrow="Newest first">
         {transactions.length ? (
           <div className="overflow-x-auto">
             <table className="data-table">
@@ -28,7 +36,7 @@ export default function TransactionsPage() {
                   <th>Date</th>
                   <th>Description</th>
                   <th>Category</th>
-                  <th>Source</th>
+                  <th>Movement</th>
                   <th>Amount</th>
                 </tr>
               </thead>
@@ -47,16 +55,12 @@ export default function TransactionsPage() {
                     <td data-label="Category">
                       {transaction.categoryName ?? "Uncategorised"}
                     </td>
-                    <td data-label="Source">
-                      <StatusPill
-                        tone={
-                          transaction.categoryConfidence >= 90
-                            ? "good"
-                            : "neutral"
-                        }
-                      >
-                        {transaction.categoryProvenance}
-                      </StatusPill>
+                    <td
+                      data-label="Movement"
+                      className="capitalize text-[var(--muted)]"
+                    >
+                      {movementLabels[transaction.movementType] ??
+                        "Needs review"}
                     </td>
                     <td
                       data-label="Amount"
@@ -70,7 +74,7 @@ export default function TransactionsPage() {
             </table>
           </div>
         ) : (
-          <EmptyState>No fictional transactions are loaded.</EmptyState>
+          <EmptyState>No transactions are available.</EmptyState>
         )}
       </SectionCard>
     </>

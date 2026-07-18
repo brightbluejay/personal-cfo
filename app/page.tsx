@@ -1,3 +1,4 @@
+import { CfoBrief } from "@/components/cfo-brief";
 import {
   EmptyState,
   PageHeader,
@@ -5,178 +6,229 @@ import {
   StatCard,
   StatusPill,
 } from "@/components/ui";
-import { getDashboardData } from "@/src/db/queries";
-import { formatDate, formatMoney } from "@/src/lib/format";
+import { getCfoWorkspace } from "@/src/db/cfo-query";
+import { buildFallbackNarrative } from "@/src/domain/cfo/narrative-output";
+import { formatDate, formatMoney, formatMonth } from "@/src/lib/format";
 
 export const dynamic = "force-dynamic";
 
+function healthLabel(value: string) {
+  return value.replaceAll("_", " ");
+}
+
 export default function OverviewPage() {
-  const data = getDashboardData();
+  const cfo = getCfoWorkspace();
+  if (!cfo) {
+    return (
+      <>
+        <PageHeader
+          eyebrow="Overview"
+          title="Your financial position"
+          description="Reset the demo data to calculate this month's position."
+        />
+        <SectionCard title="No monthly position available">
+          <EmptyState>The demonstration data has not been loaded.</EmptyState>
+        </SectionCard>
+      </>
+    );
+  }
+  const forecast = cfo.forecast;
+  const nextIncome = forecast.nextIncome;
+  const incomeName = nextIncome?.incomeType === "salary" ? "salary" : "income";
+  const month = formatMonth(forecast.monthEndDate);
+  const headline =
+    forecast.projectedOverdraftMinor > 0
+      ? `You will reach ${formatMoney(forecast.projectedOverdraftMinor)} overdrawn before your next ${incomeName}.`
+      : `Your cash flow stays above zero through ${month}.`;
+  const description = nextIncome
+    ? `Your confirmed ${formatMoney(nextIncome.amountMinor)} ${incomeName} arrives on ${formatDate(nextIncome.date)} and lifts the account to ${formatMoney(nextIncome.balanceAfterMinor)}, but ${formatMoney(nextIncome.negativeBalanceClearedMinor)}—${Math.round(nextIncome.negativeBalanceClearedBasisPoints / 100)}%—is used clearing the earlier negative balance.`
+    : "No future confirmed income is recorded in this month's dated forecast.";
+  const allocation = nextIncome
+    ? ([
+        ["Clears the negative balance", nextIncome.negativeBalanceClearedMinor],
+        [
+          "Income allocated to confirmed commitments",
+          nextIncome.commitmentsAfterIncomeMinor,
+        ],
+        [
+          "Income allocated to protected debt payments",
+          nextIncome.protectedDebtPaymentsAfterIncomeMinor,
+        ],
+        [
+          "Income allocated to usual spending",
+          nextIncome.remainingSpendingMinor,
+        ],
+        [
+          "Income allocated to the safety cushion",
+          nextIncome.safetyCushionAllocationMinor,
+        ],
+        ["Genuinely unallocated", nextIncome.genuinelyUnallocatedMinor],
+      ] as const)
+    : [];
   return (
     <>
       <PageHeader
-        eyebrow="Evening 1 · Foundation"
-        title="Your money, in context."
-        description="A calm view of fictional cash, known commitments, and consumer debt. All figures come from the local seeded ledger."
-        action={<StatusPill tone="good">Seeded demo</StatusPill>}
+        eyebrow={`${month} cash-flow risk`}
+        title={headline}
+        description={description}
+        action={
+          <StatusPill tone="warn">
+            {healthLabel(forecast.financialHealth)}
+          </StatusPill>
+        }
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Available cash"
-          value={formatMoney(data.totals.cashMinor)}
-          detail="Across fictional local accounts"
+          label="Current accessible cash"
+          value={formatMoney(forecast.accessibleCashMinor)}
+          detail={`Position on ${formatDate(forecast.asOfDate)}`}
         />
         <StatCard
-          label="Safe to spend"
-          value={formatMoney(data.plan?.safeToSpendMinor ?? 0)}
-          detail="After known costs and protected buffer"
-          tone="sage"
-        />
-        <StatCard
-          label="Consumer debt"
-          value={formatMoney(data.totals.debtMinor)}
-          detail={`${formatMoney(data.totals.debtMinimumMinor)} contractual minimums`}
+          label="Lowest expected balance"
+          value={formatMoney(forecast.lowestProjectedBalanceMinor)}
+          detail={`${formatDate(forecast.lowestProjectedBalanceDate)} · ${forecast.daysBelowZero} days below zero`}
           tone="rust"
         />
         <StatCard
-          label="Confirmed income"
-          value={formatMoney(data.totals.confirmedIncomeMinor)}
-          detail="Within the seeded planning horizon"
+          label="Expected month-end"
+          value={formatMoney(forecast.projectedMonthEndBalanceMinor)}
+          detail={`After confirmed income, obligations and usual spending through ${formatDate(forecast.monthEndDate)}`}
+        />
+        <StatCard
+          label="Safe to spend now"
+          value={formatMoney(forecast.safeToSpendNowMinor)}
+          detail="Optional spending stays at zero while any projected balance is negative"
+          tone="sage"
         />
       </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <SectionCard title="Accounts" eyebrow="Local ledger">
-          {data.accounts.length ? (
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Account</th>
-                  <th>Type</th>
-                  <th>Balance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.accounts.map((account) => (
-                  <tr key={account.id}>
-                    <td data-label="Account" className="font-medium">
-                      {account.name}
-                    </td>
-                    <td data-label="Type" className="text-[var(--muted)]">
-                      {account.type.replaceAll("_", " ")}
-                    </td>
-                    <td
-                      data-label="Balance"
-                      className="font-mono font-semibold"
-                    >
-                      {formatMoney(account.balanceMinor)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <EmptyState>
-              Run the demo reset command to load fictional accounts.
-            </EmptyState>
-          )}
-        </SectionCard>
+      <SectionCard
+        title="Now → next income → month end"
+        eyebrow="Dated cash journey"
+        className="mt-6"
+      >
+        <div className="grid gap-px bg-[var(--line)] md:grid-cols-4">
+          <div className="bg-white p-5">
+            <p className="text-xs text-[var(--faint)]">
+              Now · {formatDate(forecast.asOfDate)}
+            </p>
+            <p className="mt-2 font-mono text-xl font-semibold">
+              {formatMoney(forecast.accessibleCashMinor)}
+            </p>
+          </div>
+          <div className="bg-[var(--rust-pale)] p-5">
+            <p className="text-xs text-[var(--rust)]">
+              Low · {formatDate(forecast.lowestProjectedBalanceDate)}
+            </p>
+            <p className="mt-2 font-mono text-xl font-semibold text-[var(--rust)]">
+              {formatMoney(forecast.lowestProjectedBalanceMinor)}
+            </p>
+          </div>
+          <div className="bg-white p-5">
+            <p className="text-xs text-[var(--faint)]">
+              After {incomeName} · {formatDate(nextIncome?.date ?? null)}
+            </p>
+            <p className="mt-2 font-mono text-xl font-semibold">
+              {nextIncome
+                ? formatMoney(nextIncome.balanceAfterMinor)
+                : "Not recorded"}
+            </p>
+            {nextIncome ? (
+              <p className="mt-1 text-xs text-[var(--muted)]">
+                Before: {formatMoney(nextIncome.balanceBeforeMinor)}
+              </p>
+            ) : null}
+          </div>
+          <div className="bg-white p-5">
+            <p className="text-xs text-[var(--faint)]">
+              Month end · {formatDate(forecast.monthEndDate)}
+            </p>
+            <p className="mt-2 font-mono text-xl font-semibold">
+              {formatMoney(forecast.projectedMonthEndBalanceMinor)}
+            </p>
+          </div>
+        </div>
+        <p className="border-t border-[var(--line)] px-5 py-3 text-xs text-[var(--muted)]">
+          Health rule: {forecast.financialHealthRule}
+        </p>
+      </SectionCard>
 
+      {nextIncome ? (
         <SectionCard
-          title="Planning position"
-          eyebrow={data.plan?.month ?? "No plan"}
+          title={`Where the next ${incomeName} goes`}
+          className="mt-6"
         >
-          {data.plan ? (
-            <div className="space-y-4 p-5">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-[var(--muted)]">
-                  Protected buffer
-                </span>
-                <span className="font-mono text-sm font-semibold">
-                  {formatMoney(data.plan.protectedBufferMinor)}
-                </span>
+          <div className="grid gap-px bg-[var(--line)] sm:grid-cols-2 xl:grid-cols-3">
+            {allocation.map(([label, amount]) => (
+              <div key={label} className="bg-white p-5">
+                <p className="text-xs text-[var(--faint)]">{label}</p>
+                <p className="mt-2 font-mono text-lg font-semibold">
+                  {formatMoney(amount)}
+                </p>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-[var(--muted)]">
-                  Committed costs
-                </span>
-                <span className="font-mono text-sm font-semibold">
-                  {formatMoney(data.plan.committedCostsMinor)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-[var(--muted)]">
-                  Debt minimums
-                </span>
-                <span className="font-mono text-sm font-semibold">
-                  {formatMoney(data.plan.debtMinimumsMinor)}
-                </span>
-              </div>
-              <div className="border-t border-[var(--line)] pt-4">
-                <StatusPill
-                  tone={
-                    data.plan.status === "buffer_preserved" ? "good" : "warn"
-                  }
-                >
-                  {data.plan.status.replaceAll("_", " ")}
-                </StatusPill>
-              </div>
-            </div>
-          ) : (
-            <EmptyState>No monthly plan has been seeded.</EmptyState>
-          )}
+            ))}
+          </div>
+          <p className="border-t border-[var(--line)] px-5 py-3 text-xs text-[var(--muted)]">
+            These buckets reconcile to the confirmed income and do not count
+            transfers, commitments or the safety cushion twice. The required
+            cushion is {formatMoney(nextIncome.safetyCushionRequirementMinor)}.
+          </p>
         </SectionCard>
-      </div>
+      ) : null}
 
       <div className="mt-6 grid gap-6 xl:grid-cols-2">
-        <SectionCard
-          title="Upcoming expenses"
-          eyebrow="Confirmed and estimated"
-        >
+        <SectionCard title="What is making this month difficult">
           <div className="divide-y divide-[var(--line)]">
-            {data.upcoming.slice(0, 4).map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between gap-5 px-5 py-4"
-              >
-                <div>
-                  <p className="text-sm font-medium">{item.description}</p>
-                  <p className="mt-1 text-xs text-[var(--muted)]">
-                    {formatDate(item.dueDate)} · {item.certainty}
-                  </p>
+            {cfo.diagnosis.drivers.slice(0, 3).map((driver) => (
+              <div key={driver.id} className="px-5 py-4">
+                <div className="flex items-baseline justify-between gap-4">
+                  <p className="text-sm font-semibold">{driver.title}</p>
+                  {driver.amountMinor > 0 ? (
+                    <span className="font-mono text-sm font-semibold">
+                      {formatMoney(driver.amountMinor)}
+                    </span>
+                  ) : null}
                 </div>
-                <span className="font-mono text-sm font-semibold">
-                  {formatMoney(item.amountMinor)}
-                </span>
+                <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+                  {driver.explanation}
+                </p>
               </div>
             ))}
           </div>
         </SectionCard>
-        <SectionCard
-          title="Recurring commitments"
-          eyebrow="Cash-flow essentials"
-        >
+        <SectionCard title="What to do now">
           <div className="divide-y divide-[var(--line)]">
-            {data.commitments.slice(0, 4).map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between gap-5 px-5 py-4"
-              >
-                <div>
-                  <p className="text-sm font-medium">{item.name}</p>
-                  <p className="mt-1 text-xs text-[var(--muted)]">
-                    {item.frequency} · {item.isPaid ? "paid" : "still due"}
-                  </p>
+            {cfo.recovery.actions.map((action) => (
+              <div key={action.id} className="px-5 py-4">
+                <div className="flex items-baseline justify-between gap-4">
+                  <p className="text-sm font-semibold">{action.title}</p>
+                  <span className="font-mono text-sm font-semibold text-[var(--sage-dark)]">
+                    +{formatMoney(action.improvementMinor)}
+                  </span>
                 </div>
-                <span className="font-mono text-sm font-semibold">
-                  {formatMoney(item.amountMinor)}
-                </span>
+                <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+                  {action.explanation}
+                </p>
               </div>
             ))}
           </div>
         </SectionCard>
       </div>
+
+      <SectionCard
+        title="CFO brief"
+        eyebrow="Calculated facts, concise interpretation"
+        className="mt-6"
+      >
+        <CfoBrief
+          type="cfo_brief"
+          initialNarrative={buildFallbackNarrative(
+            cfo.narrativeFacts,
+            "cfo_brief",
+          )}
+        />
+      </SectionCard>
     </>
   );
 }

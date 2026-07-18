@@ -14,7 +14,8 @@
     "format:check": "env -u TMP -u TEMP -u TMPDIR prettier --check .",
     "db:generate": "env -u TMP -u TEMP -u TMPDIR drizzle-kit generate",
     "db:migrate": "env -u TMP -u TEMP -u TMPDIR drizzle-kit migrate",
-    "demo:reset": "env -u TMP -u TEMP -u TMPDIR node --import tsx src/db/reset.ts"
+    "demo:reset": "env -u TMP -u TEMP -u TMPDIR node --import tsx src/db/reset.ts",
+    "demo:generate-briefs": "env -u TMP -u TEMP -u TMPDIR node --env-file-if-exists=.env.local --conditions=react-server --import tsx src/server/generate-demo-narratives.ts"
   },
   "keywords": [],
   "author": "",
@@ -28,8 +29,10 @@
     "csv-parse": "^7.0.1",
     "drizzle-orm": "^0.45.2",
     "next": "^16.2.10",
+    "openai": "^6.48.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "server-only": "^0.0.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
