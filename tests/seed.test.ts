@@ -31,12 +31,19 @@ afterEach(() => {
 
 describe("fictional demo seed", () => {
   it("migrates every CSV dataset into its intended table", () => {
-    expect(counts.accounts).toBe(1);
+    expect(counts.accounts).toBe(
+      readFixture(fixtureDirectory, "accounts.csv").length + 1,
+    );
     expect(counts.transactions).toBe(
-      readFixture(fixtureDirectory, "transactions.csv").length,
+      readFixture(fixtureDirectory, "transactions.csv").length +
+        readFixture(fixtureDirectory, "phase1-transactions.csv").length +
+        readFixture(fixtureDirectory, "household-history.csv").length,
     );
     expect(counts.debts).toBe(
       readFixture(fixtureDirectory, "debts.csv").length,
+    );
+    expect(counts.debtSnapshots).toBe(
+      readFixture(fixtureDirectory, "debt-snapshots.csv").length,
     );
     expect(counts.income).toBe(
       readFixture(fixtureDirectory, "income.csv").length,
@@ -45,7 +52,8 @@ describe("fictional demo seed", () => {
       readFixture(fixtureDirectory, "essential-expenses.csv").length,
     );
     expect(counts.upcomingExpenses).toBe(
-      readFixture(fixtureDirectory, "upcoming-expenses.csv").length,
+      readFixture(fixtureDirectory, "upcoming-expenses.csv").length +
+        readFixture(fixtureDirectory, "phase1-upcoming-expenses.csv").length,
     );
     expect(counts.sinkingFunds).toBe(
       readFixture(fixtureDirectory, "sinking-funds.csv").length,
@@ -53,6 +61,21 @@ describe("fictional demo seed", () => {
     expect(counts.monthlyPlans).toBe(1);
     expect(counts.aiReviews).toBe(0);
     expect(counts.syncConnections).toBe(0);
+  });
+
+  it("stores explicit income kinds and debt activity without inferring either", () => {
+    const salaryIncome = sqlite
+      .prepare("select count(*) as count from income where kind = 'salary'")
+      .get() as { count: number };
+    const snapshotActivity = sqlite
+      .prepare(
+        "select sum(payments_minor) as payments, sum(interest_charged_minor) as interest, sum(new_borrowing_minor) as borrowing from debt_snapshots where snapshot_date = (select max(snapshot_date) from debt_snapshots)",
+      )
+      .get() as { payments: number; interest: number; borrowing: number };
+    expect(salaryIncome.count).toBeGreaterThan(0);
+    expect(snapshotActivity.payments).toBeGreaterThan(0);
+    expect(snapshotActivity.interest).toBeGreaterThan(0);
+    expect(snapshotActivity.borrowing).toBeGreaterThan(0);
   });
 
   it("creates complete deterministic category links and valid foreign keys", () => {
@@ -66,6 +89,34 @@ describe("fictional demo seed", () => {
     expect(counts.categoryRules).toBeGreaterThan(0);
     expect(counts.categoryRules).toBeLessThanOrEqual(counts.transactions);
     expect(foreignKeyErrors).toHaveLength(0);
+  });
+
+  it("persists account roles and transfer metadata for deterministic reconciliation", () => {
+    const metadata = sqlite
+      .prepare(
+        "select count(*) as account_count from accounts where ownership = 'owned' and role in ('spending', 'savings')",
+      )
+      .get() as { account_count: number };
+    const movements = sqlite
+      .prepare(
+        "select count(*) as movement_count from transactions where movement_type in ('internal_transfer', 'savings_transfer')",
+      )
+      .get() as { movement_count: number };
+    expect(metadata.account_count).toBeGreaterThanOrEqual(2);
+    expect(movements.movement_count).toBeGreaterThan(0);
+  });
+
+  it("classifies recorded debt payments as protected debt movements", () => {
+    const debtMovements = sqlite
+      .prepare(
+        "select count(*) as count from transactions where movement_type = 'debt_payment'",
+      )
+      .get() as { count: number };
+    const debtCategory = sqlite
+      .prepare("select flexibility from categories where slug = 'debt-payment'")
+      .get() as { flexibility: string };
+    expect(debtMovements.count).toBeGreaterThan(0);
+    expect(debtCategory.flexibility).toBe("protected");
   });
 
   it("stores the monthly plan using the documented cash-flow equation", () => {

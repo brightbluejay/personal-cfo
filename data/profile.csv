@@ -1,4 +1,7 @@
 key,value,notes
+household_name,David,Fictional demonstration persona
+adults,2,Fictional household size
+children,3,Fictional household size
 currency,GBP,Fictional demo uses pounds sterling
 planning_date,2026-07-15,Fictional planning date
 current_bank_balance,420.00,Fictional available current-account balance

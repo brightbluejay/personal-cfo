@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { parse } from "csv-parse/sync";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
@@ -14,6 +14,15 @@ export function readFixture(dataDirectory: string, filename: string): CsvRow[] {
     skip_empty_lines: true,
     trim: true,
   }) as CsvRow[];
+}
+
+function readOptionalFixture(
+  dataDirectory: string,
+  filename: string,
+): CsvRow[] {
+  return existsSync(path.join(dataDirectory, filename))
+    ? readFixture(dataDirectory, filename)
+    : [];
 }
 
 function pick(row: CsvRow, keys: string[]) {
@@ -81,6 +90,50 @@ function isYes(value: string) {
   return ["yes", "true", "1"].includes(value.toLowerCase());
 }
 
+function addMonths(isoDate: string, monthOffset: number, day: number) {
+  const [year, month] = isoDate.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1 + monthOffset, 1));
+  const lastDay = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0),
+  ).getUTCDate();
+  date.setUTCDate(Math.min(Math.max(1, day), lastDay));
+  return date.toISOString().slice(0, 10);
+}
+
+function addDays(isoDate: string, dayOffset: number) {
+  const date = new Date(`${isoDate}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + dayOffset);
+  return date.toISOString().slice(0, 10);
+}
+
+function movementType(
+  value: string,
+  amountMinor: number,
+  categoryName: string,
+) {
+  const allowed = new Set([
+    "income",
+    "expense",
+    "internal_transfer",
+    "savings_transfer",
+    "debt_payment",
+    "refund",
+    "adjustment",
+    "unknown",
+  ]);
+  if (allowed.has(value)) return value;
+  if (slugify(categoryName) === "debt-payment") return "debt_payment";
+  return amountMinor > 0 ? "income" : "expense";
+}
+
+function spendingContext(value: string) {
+  return ["routine", "one_off_unavoidable", "one_off_discretionary"].includes(
+    value,
+  )
+    ? value
+    : "routine";
+}
+
 function confidence(value: string) {
   if (!value) return 100;
   const numeric = Number(value);
@@ -101,12 +154,36 @@ export function seedDatabase(
   dataDirectory: string,
 ): SeedCounts {
   const profileRows = readFixture(dataDirectory, "profile.csv");
-  const transactionRows = readFixture(dataDirectory, "transactions.csv");
+  const baseTransactionRows = readFixture(dataDirectory, "transactions.csv");
+  const phaseTransactionRows = readOptionalFixture(
+    dataDirectory,
+    "phase1-transactions.csv",
+  );
+  const householdHistoryRows = readOptionalFixture(
+    dataDirectory,
+    "household-history.csv",
+  );
   const debtRows = readFixture(dataDirectory, "debts.csv");
+  const debtSnapshotRows = readOptionalFixture(
+    dataDirectory,
+    "debt-snapshots.csv",
+  );
   const incomeRows = readFixture(dataDirectory, "income.csv");
   const commitmentRows = readFixture(dataDirectory, "essential-expenses.csv");
-  const upcomingRows = readFixture(dataDirectory, "upcoming-expenses.csv");
+  const baseUpcomingRows = readFixture(dataDirectory, "upcoming-expenses.csv");
+  const phaseUpcomingRows = readOptionalFixture(
+    dataDirectory,
+    "phase1-upcoming-expenses.csv",
+  );
   const sinkingRows = readFixture(dataDirectory, "sinking-funds.csv");
+  const additionalAccountRows = readOptionalFixture(
+    dataDirectory,
+    "accounts.csv",
+  );
+  const categoryPolicyRows = readOptionalFixture(
+    dataDirectory,
+    "category-policies.csv",
+  );
 
   const profile = new Map(
     profileRows.map((row) => [
@@ -122,7 +199,114 @@ export function seedDatabase(
   }
   const timestamp = `${planningDate}T00:00:00.000Z`;
   const accountId = "account-fictional-current";
-
+  const transactionRows = [
+    ...baseTransactionRows.map((row) => ({ ...row, account_ref: accountId })),
+    ...phaseTransactionRows.map((row) => ({
+      ...row,
+      date: addMonths(
+        planningDate,
+        Number.parseInt(
+          requireField(
+            row,
+            ["month_offset"],
+            "phase1-transactions.csv",
+            "month offset",
+          ),
+          10,
+        ),
+        Number.parseInt(
+          requireField(row, ["day"], "phase1-transactions.csv", "day"),
+          10,
+        ),
+      ),
+    })),
+    ...householdHistoryRows.map((row) => ({
+      ...row,
+      account_ref: pick(row, ["account_ref"]) || accountId,
+      date: addMonths(
+        planningDate,
+        Number.parseInt(
+          requireField(
+            row,
+            ["month_offset"],
+            "household-history.csv",
+            "month offset",
+          ),
+          10,
+        ),
+        Number.parseInt(
+          requireField(row, ["day"], "household-history.csv", "day"),
+          10,
+        ),
+      ),
+    })),
+  ];
+  const upcomingRows = [
+    ...baseUpcomingRows,
+    ...phaseUpcomingRows.map((row) => ({
+      ...row,
+      date: addDays(
+        planningDate,
+        Number.parseInt(
+          requireField(
+            row,
+            ["days_from_planning"],
+            "phase1-upcoming-expenses.csv",
+            "day offset",
+          ),
+          10,
+        ),
+      ),
+    })),
+  ];
+  const flexibilityByCategory = new Map(
+    categoryPolicyRows.map((row) => [
+      requireField(row, ["name"], "category-policies.csv", "name"),
+      requireField(
+        row,
+        ["flexibility"],
+        "category-policies.csv",
+        "flexibility",
+      ),
+    ]),
+  );
+  const accountRecords = [
+    {
+      id: accountId,
+      name: "Current account",
+      type: "current_account",
+      currency: "GBP",
+      balanceMinor: moneyToMinor(openingCash),
+      isDemo: true,
+      ownership: "owned",
+      role: "primary",
+      purpose: null,
+      envelopeCategoriesJson: "[]",
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    },
+    ...additionalAccountRows.map((row) => ({
+      id: requireField(row, ["id"], "accounts.csv", "id"),
+      name: requireField(row, ["name"], "accounts.csv", "name"),
+      type: requireField(row, ["type"], "accounts.csv", "type"),
+      currency: pick(row, ["currency"]) || "GBP",
+      balanceMinor: moneyToMinor(
+        requireField(row, ["balance"], "accounts.csv", "balance"),
+      ),
+      isDemo: true,
+      ownership: pick(row, ["ownership"]) || "unknown",
+      role: pick(row, ["role"]) || "other",
+      purpose: pick(row, ["purpose"]) || null,
+      envelopeCategoriesJson: JSON.stringify(
+        (pick(row, ["envelope_categories"]) || "")
+          .split("|")
+          .map((value) => slugify(value))
+          .filter(Boolean),
+      ),
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    })),
+  ];
   const essentialCategoryNames = new Set(
     commitmentRows.map((row) => pick(row, ["category"])).filter(Boolean),
   );
@@ -145,6 +329,11 @@ export function seedDatabase(
       slug,
       kind: "expense",
       isEssential: essentialCategoryNames.has(name),
+      flexibility:
+        flexibilityByCategory.get(name) ??
+        (essentialCategoryNames.has(name) || slugify(name) === "debt-payment"
+          ? "protected"
+          : "limited"),
       createdAt: timestamp,
       updatedAt: timestamp,
     };
@@ -166,13 +355,22 @@ export function seedDatabase(
       "transactions.csv",
       "category",
     );
+    const amountMinor = moneyToMinor(
+      requireField(row, ["amount"], "transactions.csv", "amount"),
+    );
+    const transactionAccountId = pick(row, ["account_ref"]) || accountId;
+    const counterpartyAccountId = pick(row, ["counterparty_account_ref"]);
     return {
       id: stableId(
         "transaction",
         `${pick(row, ["date", "booked_date"])}:${description}`,
         index,
       ),
-      accountId,
+      accountId: accountRecords.some(
+        (account) => account.id === transactionAccountId,
+      )
+        ? transactionAccountId
+        : accountId,
       categoryId: categoryIdByName.get(categoryName) ?? null,
       bookedDate: requireField(
         row,
@@ -182,9 +380,22 @@ export function seedDatabase(
       ),
       description,
       normalizedDescription: normalizeDescription(description),
-      amountMinor: moneyToMinor(
-        requireField(row, ["amount"], "transactions.csv", "amount"),
+      amountMinor,
+      movementType: movementType(
+        pick(row, ["movement_type"]),
+        amountMinor,
+        categoryName,
       ),
+      spendingContext: spendingContext(pick(row, ["spending_context"])),
+      forecastBaselineEligible: !["no", "false", "0"].includes(
+        pick(row, ["forecast_baseline_eligible"]).toLowerCase(),
+      ),
+      counterpartyAccountId: accountRecords.some(
+        (account) => account.id === counterpartyAccountId,
+      )
+        ? counterpartyAccountId
+        : null,
+      externalReference: pick(row, ["reference", "external_reference"]) || null,
       categoryProvenance:
         pick(row, ["category_provenance", "provenance", "category_source"]) ||
         "fixture",
@@ -239,6 +450,9 @@ export function seedDatabase(
     ),
     promotionalEndDate:
       pick(row, ["promo_end_date", "promotional_end_date"]) || null,
+    postPromotionalAprBasisPoints: percentToBasisPoints(
+      pick(row, ["post_promo_apr_percent", "post_promotional_apr_percent"]),
+    ),
     contractualPaymentDay:
       Number.parseInt(
         pick(row, ["payment_day", "contractual_payment_day"]),
@@ -248,6 +462,48 @@ export function seedDatabase(
     createdAt: timestamp,
     updatedAt: timestamp,
   }));
+
+  const debtIdByName = new Map(
+    debtRecords.map((record) => [record.name, record.id]),
+  );
+  const debtSnapshotRecords = debtSnapshotRows.map((row, index) => {
+    const debtName = requireField(
+      row,
+      ["debt_name", "name"],
+      "debt-snapshots.csv",
+      "debt name",
+    );
+    const debtId = debtIdByName.get(debtName);
+    if (!debtId) {
+      throw new Error(
+        "debt-snapshots.csv references a debt that is not in debts.csv.",
+      );
+    }
+    const snapshotDate = requireField(
+      row,
+      ["snapshot_date", "date"],
+      "debt-snapshots.csv",
+      "snapshot date",
+    );
+    return {
+      id: stableId("debt-snapshot", `${debtName}:${snapshotDate}`, index),
+      debtId,
+      snapshotDate,
+      balanceMinor: moneyToMinor(
+        requireField(row, ["balance"], "debt-snapshots.csv", "balance"),
+      ),
+      paymentsMinor: moneyToMinor(pick(row, ["payments"]) || "0"),
+      interestChargedMinor: moneyToMinor(
+        pick(row, ["interest_charged", "interest"]) || "0",
+      ),
+      newBorrowingMinor: moneyToMinor(
+        pick(row, ["new_borrowing", "borrowing"]) || "0",
+      ),
+      source: "fixture",
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+  });
 
   const incomeRecords = incomeRows.map((row, index) => {
     const source = requireField(
@@ -260,6 +516,7 @@ export function seedDatabase(
       id: stableId("income", source, index),
       accountId,
       source,
+      kind: pick(row, ["kind", "type", "income_type"]) || "other",
       amountMinor: moneyToMinor(
         requireField(row, ["amount"], "income.csv", "amount"),
       ),
@@ -407,6 +664,7 @@ export function seedDatabase(
   const monthlyPlanRecord = {
     id: `plan-${planningDate.slice(0, 7)}`,
     month: planningDate.slice(0, 7),
+    asOfDate: planningDate,
     openingCashMinor,
     expectedIncomeMinor: confirmedIncome,
     committedCostsMinor,
@@ -416,6 +674,11 @@ export function seedDatabase(
     status:
       projectedCash >= bufferMinor ? "buffer_preserved" : "buffer_at_risk",
     assumptionsJson: JSON.stringify({
+      household: {
+        name: profile.get("household_name") || "Demo household",
+        adults: Number.parseInt(profile.get("adults") || "1", 10),
+        children: Number.parseInt(profile.get("children") || "0", 10),
+      },
       dataQuality: "confirmed rows only for income and upcoming costs",
       debtMinimums: "all contractual minimums included",
       sinkingFunds: "all monthly contributions included",
@@ -425,6 +688,7 @@ export function seedDatabase(
   };
 
   db.transaction((tx) => {
+    tx.delete(schema.narrativeCache).run();
     tx.delete(schema.aiReviews).run();
     tx.delete(schema.syncConnections).run();
     tx.delete(schema.categoryRules).run();
@@ -433,23 +697,13 @@ export function seedDatabase(
     tx.delete(schema.upcomingExpenses).run();
     tx.delete(schema.sinkingFunds).run();
     tx.delete(schema.income).run();
+    tx.delete(schema.debtSnapshots).run();
     tx.delete(schema.debts).run();
     tx.delete(schema.monthlyPlans).run();
     tx.delete(schema.categories).run();
     tx.delete(schema.accounts).run();
 
-    tx.insert(schema.accounts)
-      .values({
-        id: accountId,
-        name: "Fictional current account",
-        type: "current_account",
-        currency: "GBP",
-        balanceMinor: openingCashMinor,
-        isDemo: true,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      })
-      .run();
+    tx.insert(schema.accounts).values(accountRecords).run();
     if (categoryRecords.length)
       tx.insert(schema.categories).values(categoryRecords).run();
     if (transactionRecords.length)
@@ -457,6 +711,8 @@ export function seedDatabase(
     if (ruleRecords.length)
       tx.insert(schema.categoryRules).values(ruleRecords).run();
     if (debtRecords.length) tx.insert(schema.debts).values(debtRecords).run();
+    if (debtSnapshotRecords.length)
+      tx.insert(schema.debtSnapshots).values(debtSnapshotRecords).run();
     if (incomeRecords.length)
       tx.insert(schema.income).values(incomeRecords).run();
     if (commitmentRecords.length)
@@ -469,11 +725,12 @@ export function seedDatabase(
   });
 
   return {
-    accounts: 1,
+    accounts: accountRecords.length,
     transactions: transactionRecords.length,
     categories: categoryRecords.length,
     categoryRules: ruleRecords.length,
     debts: debtRecords.length,
+    debtSnapshots: debtSnapshotRecords.length,
     income: incomeRecords.length,
     recurringCommitments: commitmentRecords.length,
     upcomingExpenses: upcomingRecords.length,
@@ -481,5 +738,6 @@ export function seedDatabase(
     monthlyPlans: 1,
     aiReviews: 0,
     syncConnections: 0,
+    narrativeCache: 0,
   };
 }

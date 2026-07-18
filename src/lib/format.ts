@@ -19,3 +19,10 @@ export function formatDate(value: string | null) {
 export function formatApr(basisPoints: number) {
   return `${(basisPoints / 100).toFixed(2)}%`;
 }
+
+export function formatMonth(value: string) {
+  return new Intl.DateTimeFormat("en-GB", {
+    month: "long",
+    timeZone: "UTC",
+  }).format(new Date(`${value.slice(0, 7)}-01T00:00:00Z`));
+}

@@ -1,2 +1,2 @@
-date,source,amount,certainty,notes
-2026-07-25,Demo salary,3150.00,confirmed,Fictional monthly net income
+date,source,kind,amount,certainty,notes
+2026-07-25,Demo salary,salary,3150.00,confirmed,Fictional monthly net income

@@ -18,6 +18,12 @@ export const accounts = sqliteTable("accounts", {
   currency: text("currency").notNull().default("GBP"),
   balanceMinor: integer("balance_minor").notNull(),
   isDemo: integer("is_demo", { mode: "boolean" }).notNull().default(true),
+  ownership: text("ownership").notNull().default("unknown"),
+  role: text("role").notNull().default("other"),
+  purpose: text("purpose"),
+  envelopeCategoriesJson: text("envelope_categories_json")
+    .notNull()
+    .default("[]"),
   ...timestamps,
 });
 
@@ -31,6 +37,7 @@ export const categories = sqliteTable(
     isEssential: integer("is_essential", { mode: "boolean" })
       .notNull()
       .default(false),
+    flexibility: text("flexibility").notNull().default("limited"),
     ...timestamps,
   },
   (table) => [uniqueIndex("categories_slug_unique").on(table.slug)],
@@ -50,6 +57,18 @@ export const transactions = sqliteTable(
     description: text("description").notNull(),
     normalizedDescription: text("normalized_description").notNull(),
     amountMinor: integer("amount_minor").notNull(),
+    movementType: text("movement_type").notNull().default("unknown"),
+    spendingContext: text("spending_context").notNull().default("routine"),
+    forecastBaselineEligible: integer("forecast_baseline_eligible", {
+      mode: "boolean",
+    })
+      .notNull()
+      .default(true),
+    counterpartyAccountId: text("counterparty_account_id").references(
+      () => accounts.id,
+      { onDelete: "set null" },
+    ),
+    externalReference: text("external_reference"),
     categoryProvenance: text("category_provenance")
       .notNull()
       .default("fixture"),
@@ -93,10 +112,31 @@ export const debts = sqliteTable("debts", {
   minimumPaymentMinor: integer("minimum_payment_minor").notNull(),
   promotionalAprBasisPoints: integer("promotional_apr_basis_points"),
   promotionalEndDate: text("promotional_end_date"),
+  postPromotionalAprBasisPoints: integer("post_promotional_apr_basis_points"),
   contractualPaymentDay: integer("contractual_payment_day"),
   notes: text("notes"),
   ...timestamps,
 });
+
+export const debtSnapshots = sqliteTable(
+  "debt_snapshots",
+  {
+    id: text("id").primaryKey(),
+    debtId: text("debt_id")
+      .notNull()
+      .references(() => debts.id, { onDelete: "cascade" }),
+    snapshotDate: text("snapshot_date").notNull(),
+    balanceMinor: integer("balance_minor").notNull(),
+    paymentsMinor: integer("payments_minor").notNull().default(0),
+    interestChargedMinor: integer("interest_charged_minor")
+      .notNull()
+      .default(0),
+    newBorrowingMinor: integer("new_borrowing_minor").notNull().default(0),
+    source: text("source").notNull().default("fixture"),
+    ...timestamps,
+  },
+  (table) => [index("debt_snapshots_date_idx").on(table.snapshotDate)],
+);
 
 export const income = sqliteTable("income", {
   id: text("id").primaryKey(),
@@ -104,6 +144,7 @@ export const income = sqliteTable("income", {
     onDelete: "set null",
   }),
   source: text("source").notNull(),
+  kind: text("kind").notNull().default("other"),
   amountMinor: integer("amount_minor").notNull(),
   expectedDate: text("expected_date"),
   frequency: text("frequency"),
@@ -163,6 +204,7 @@ export const monthlyPlans = sqliteTable(
   {
     id: text("id").primaryKey(),
     month: text("month").notNull(),
+    asOfDate: text("as_of_date").notNull(),
     openingCashMinor: integer("opening_cash_minor").notNull(),
     expectedIncomeMinor: integer("expected_income_minor").notNull(),
     committedCostsMinor: integer("committed_costs_minor").notNull(),
@@ -199,4 +241,16 @@ export const syncConnections = sqliteTable("sync_connections", {
   errorMessage: text("error_message"),
   metadataJson: text("metadata_json").notNull().default("{}"),
   ...timestamps,
+});
+
+export const narrativeCache = sqliteTable("narrative_cache", {
+  key: text("key").primaryKey(),
+  factPackageHash: text("fact_package_hash").notNull(),
+  narrativeType: text("narrative_type").notNull(),
+  scenarioHash: text("scenario_hash").notNull(),
+  model: text("model").notNull(),
+  promptVersion: text("prompt_version").notNull(),
+  schemaVersion: text("schema_version").notNull(),
+  responseJson: text("response_json").notNull(),
+  generatedAt: text("generated_at").notNull(),
 });

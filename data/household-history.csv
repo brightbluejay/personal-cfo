@@ -1,0 +1,117 @@
+month_offset,day,account_ref,description,amount,category,movement_type,spending_context,counterparty_account_ref,reference,forecast_baseline_eligible
+-3,1,account-fictional-current,DD BRITISH GAS,-148.00,Utilities,expense,routine,,,false
+-3,2,account-fictional-current,DD HOME INSURE,-42.00,Insurance,expense,routine,,,false
+-3,3,account-fictional-current,TESCO STORES 3412,-92.40,Groceries,expense,routine,,,false
+-3,4,account-fictional-current,DD PUREGYM,-24.99,Subscriptions,expense,routine,,,false
+-3,5,account-fictional-current,NETFLIX.COM,-12.99,Subscriptions,expense,routine,,,false
+-3,5,account-fictional-current,CLOUDY DIGITAL,-4.99,Subscriptions,expense,routine,,,false
+-3,6,account-fictional-current,TESCO PFS 4632,-42.00,Fuel,expense,routine,,,false
+-3,7,account-fictional-current,SCHOOL MEALS ONLINE,-38.50,School and children,expense,routine,,,false
+-3,8,account-fictional-current,ASDA SUPERSTORE 4721,-18.60,Groceries,expense,routine,,,false
+-3,10,account-fictional-current,TESCO STORES 3412,-96.10,Groceries,expense,routine,,,false
+-3,11,account-fictional-current,BUS MOBILE TICKETS,-18.00,Public transport,expense,routine,,,false
+-3,12,account-fictional-current,COFFEE HOUSE,-6.40,Coffee,expense,routine,,,false
+-3,13,account-fictional-current,SHELL SERVICE STN,-44.00,Fuel,expense,routine,,,false
+-3,14,account-fictional-current,AMZNMktplace,-26.70,Household essentials,expense,routine,,,false
+-3,16,account-fictional-current,TESCO STORES 3412,-88.30,Groceries,expense,routine,,,false
+-3,17,account-fictional-current,SCHOOL CLUB PAYMENT,-32.00,School and children,expense,routine,,,false
+-3,18,account-fictional-current,ASDA SUPERSTORE 4721,-14.80,Groceries,expense,routine,,,false
+-3,19,account-fictional-current,LOCAL GARAGE REPAIR,-280.00,Unexpected costs,expense,one_off_unavoidable,,,false
+-3,20,account-fictional-current,TESCO PFS 4632,-45.00,Fuel,expense,routine,,,false
+-3,22,account-fictional-current,TESCO STORES 3412,-90.60,Groceries,expense,routine,,,false
+-3,23,account-fictional-current,KIDS SHOE SHOP,-46.00,Children clothing,expense,one_off_unavoidable,,,false
+-3,24,account-fictional-current,JUST EAT,-31.20,Eating out,expense,routine,,,false
+-3,25,account-fictional-current,ACME EMPLOYER PAY,3150.00,Income,income,routine,,,false
+-3,26,account-fictional-current,ORBIT CARD PAYMENT,-145.00,Debt payment,debt_payment,routine,,,false
+-3,26,account-fictional-current,HARBOUR LOAN PAYMENT,-220.00,Debt payment,debt_payment,routine,,,false
+-3,26,account-fictional-current,MAPLE FINANCE PAYMENT,-48.00,Debt payment,debt_payment,routine,,,false
+-3,27,account-fictional-current,TESCO STORES 3412,-84.20,Groceries,expense,routine,,,false
+-3,28,account-fictional-current,JUST EAT,-26.80,Eating out,expense,routine,,,false
+-3,28,account-fictional-current,CINEMA ONLINE,-34.00,Leisure,expense,routine,,,false
+-3,29,account-fictional-current,TRANSFER TO SPENDING,-320.00,Transfers,internal_transfer,routine,account-fictional-spending,APR-SPEND,false
+-3,29,account-fictional-spending,TRANSFER FROM CURRENT,320.00,Transfers,internal_transfer,routine,account-fictional-current,APR-SPEND,false
+-3,30,account-fictional-current,PLUM FINTECH,-75.00,Savings,savings_transfer,routine,account-fictional-savings,APR-SAVE,false
+-3,30,account-fictional-savings,PLUM FINTECH,75.00,Savings,savings_transfer,routine,account-fictional-current,APR-SAVE,false
+-2,1,account-fictional-current,DD BRITISH GAS,-148.00,Utilities,expense,routine,,,false
+-2,2,account-fictional-current,DD HOME INSURE,-42.00,Insurance,expense,routine,,,false
+-2,3,account-fictional-current,ASDA SUPERSTORE 4721,-101.70,Groceries,expense,routine,,,false
+-2,4,account-fictional-current,DD PUREGYM,-24.99,Subscriptions,expense,routine,,,false
+-2,5,account-fictional-current,NETFLIX.COM,-12.99,Subscriptions,expense,routine,,,false
+-2,5,account-fictional-current,CLOUDY DIGITAL,-4.99,Subscriptions,expense,routine,,,false
+-2,6,account-fictional-current,SHELL SERVICE STN,-48.00,Fuel,expense,routine,,,false
+-2,7,account-fictional-current,SCHOOL MEALS ONLINE,-38.50,School and children,expense,routine,,,false
+-2,8,account-fictional-current,TESCO STORES 3412,-22.40,Groceries,expense,routine,,,false
+-2,10,account-fictional-current,ASDA SUPERSTORE 4721,-104.80,Groceries,expense,routine,,,false
+-2,11,account-fictional-current,BUS MOBILE TICKETS,-18.00,Public transport,expense,routine,,,false
+-2,12,account-fictional-current,COFFEE HOUSE,-8.20,Coffee,expense,routine,,,false
+-2,13,account-fictional-current,TESCO PFS 4632,-51.00,Fuel,expense,routine,,,false
+-2,14,account-fictional-current,AMZNMktplace,-31.40,Household essentials,expense,routine,,,false
+-2,16,account-fictional-current,ASDA SUPERSTORE 4721,-98.50,Groceries,expense,routine,,,false
+-2,17,account-fictional-current,SCHOOL CLUB PAYMENT,-32.00,School and children,expense,routine,,,false
+-2,18,account-fictional-current,TESCO STORES 3412,-19.30,Groceries,expense,routine,,,false
+-2,19,account-fictional-current,APPLIANCE REPAIR CO,-190.00,Unexpected costs,expense,one_off_unavoidable,,,false
+-2,20,account-fictional-current,SHELL SERVICE STN,-54.00,Fuel,expense,routine,,,false
+-2,22,account-fictional-current,ASDA SUPERSTORE 4721,-100.20,Groceries,expense,routine,,,false
+-2,23,account-fictional-current,KIDS CLOTHING STORE,-52.00,Children clothing,expense,one_off_discretionary,,,false
+-2,24,account-fictional-current,JUST EAT,-35.40,Eating out,expense,routine,,,false
+-2,25,account-fictional-current,ACME EMPLOYER PAY,3150.00,Income,income,routine,,,false
+-2,26,account-fictional-current,ORBIT CARD PAYMENT,-145.00,Debt payment,debt_payment,routine,,,false
+-2,26,account-fictional-current,HARBOUR LOAN PAYMENT,-220.00,Debt payment,debt_payment,routine,,,false
+-2,26,account-fictional-current,MAPLE FINANCE PAYMENT,-48.00,Debt payment,debt_payment,routine,,,false
+-2,27,account-fictional-current,ASDA SUPERSTORE 4721,-92.80,Groceries,expense,routine,,,false
+-2,28,account-fictional-current,JUST EAT,-33.60,Eating out,expense,routine,,,false
+-2,28,account-fictional-current,SOFT PLAY CENTRE,-29.00,Leisure,expense,routine,,,false
+-2,29,account-fictional-current,TRANSFER TO SPENDING,-340.00,Transfers,internal_transfer,routine,account-fictional-spending,MAY-SPEND,false
+-2,29,account-fictional-spending,TRANSFER FROM CURRENT,340.00,Transfers,internal_transfer,routine,account-fictional-current,MAY-SPEND,false
+-2,30,account-fictional-current,PLUM FINTECH,-60.00,Savings,savings_transfer,routine,account-fictional-savings,MAY-SAVE,false
+-2,30,account-fictional-savings,PLUM FINTECH,60.00,Savings,savings_transfer,routine,account-fictional-current,MAY-SAVE,false
+-1,1,account-fictional-current,DD BRITISH GAS,-148.00,Utilities,expense,routine,,,false
+-1,2,account-fictional-current,DD HOME INSURE,-42.00,Insurance,expense,routine,,,false
+-1,3,account-fictional-current,TESCO STORES 3412,-109.20,Groceries,expense,routine,,,false
+-1,4,account-fictional-current,DD PUREGYM,-24.99,Subscriptions,expense,routine,,,false
+-1,5,account-fictional-current,NETFLIX.COM,-12.99,Subscriptions,expense,routine,,,false
+-1,5,account-fictional-current,CLOUDY DIGITAL,-4.99,Subscriptions,expense,routine,,,false
+-1,6,account-fictional-current,SHELL SERVICE STN,-55.00,Fuel,expense,routine,,,false
+-1,7,account-fictional-current,SCHOOL MEALS ONLINE,-38.50,School and children,expense,routine,,,false
+-1,8,account-fictional-current,ASDA SUPERSTORE 4721,-28.70,Groceries,expense,routine,,,false
+-1,10,account-fictional-current,TESCO STORES 3412,-112.60,Groceries,expense,routine,,,false
+-1,11,account-fictional-current,BUS MOBILE TICKETS,-18.00,Public transport,expense,routine,,,false
+-1,12,account-fictional-current,COFFEE HOUSE,-10.40,Coffee,expense,routine,,,false
+-1,13,account-fictional-current,TESCO PFS 4632,-59.00,Fuel,expense,routine,,,false
+-1,14,account-fictional-current,AMZNMktplace,-37.80,Household essentials,expense,routine,,,false
+-1,16,account-fictional-current,TESCO STORES 3412,-106.40,Groceries,expense,routine,,,false
+-1,17,account-fictional-current,SCHOOL CLUB PAYMENT,-32.00,School and children,expense,routine,,,false
+-1,18,account-fictional-current,ASDA SUPERSTORE 4721,-25.20,Groceries,expense,routine,,,false
+-1,19,account-fictional-current,SCHOOL TRIP PAYMENT,-145.00,Unexpected costs,expense,one_off_unavoidable,,,false
+-1,20,account-fictional-current,SHELL SERVICE STN,-64.00,Fuel,expense,routine,,,false
+-1,22,account-fictional-current,TESCO STORES 3412,-108.90,Groceries,expense,routine,,,false
+-1,23,account-fictional-current,KIDS CLOTHING STORE,-61.00,Children clothing,expense,one_off_discretionary,,,false
+-1,24,account-fictional-current,JUST EAT,-39.50,Eating out,expense,routine,,,false
+-1,25,account-fictional-current,ACME EMPLOYER PAY,3150.00,Income,income,routine,,,false
+-1,26,account-fictional-current,ORBIT CARD PAYMENT,-145.00,Debt payment,debt_payment,routine,,,false
+-1,26,account-fictional-current,HARBOUR LOAN PAYMENT,-220.00,Debt payment,debt_payment,routine,,,false
+-1,26,account-fictional-current,MAPLE FINANCE PAYMENT,-48.00,Debt payment,debt_payment,routine,,,false
+-1,27,account-fictional-current,TESCO STORES 3412,-101.30,Groceries,expense,routine,,,false
+-1,28,account-fictional-current,JUST EAT,-42.80,Eating out,expense,routine,,,false
+-1,28,account-fictional-current,FAMILY SWIM,-26.00,Leisure,expense,routine,,,false
+-1,29,account-fictional-current,TRANSFER TO SPENDING,-360.00,Transfers,internal_transfer,routine,account-fictional-spending,JUN-SPEND,false
+-1,29,account-fictional-spending,TRANSFER FROM CURRENT,360.00,Transfers,internal_transfer,routine,account-fictional-current,JUN-SPEND,false
+-1,30,account-fictional-current,PLUM FINTECH,-40.00,Savings,savings_transfer,routine,account-fictional-savings,JUN-SAVE,false
+-1,30,account-fictional-savings,PLUM FINTECH,40.00,Savings,savings_transfer,routine,account-fictional-current,JUN-SAVE,false
+0,1,account-fictional-current,DD BRITISH GAS,-148.00,Utilities,expense,routine,,,false
+0,2,account-fictional-current,DD HOME INSURE,-42.00,Insurance,expense,routine,,,false
+0,3,account-fictional-current,TESCO STORES 3412,-126.40,Groceries,expense,routine,,,false
+0,4,account-fictional-current,DD PUREGYM,-24.99,Subscriptions,expense,routine,,,false
+0,5,account-fictional-current,NETFLIX.COM,-12.99,Subscriptions,expense,routine,,,false
+0,5,account-fictional-current,CLOUDY DIGITAL,-4.99,Subscriptions,expense,routine,,,false
+0,6,account-fictional-current,SHELL SERVICE STN,-71.00,Fuel,expense,routine,,,false
+0,7,account-fictional-current,SCHOOL MEALS ONLINE,-38.50,School and children,expense,routine,,,false
+0,8,account-fictional-current,ASDA SUPERSTORE 4721,-38.60,Groceries,expense,routine,,,false
+0,9,account-fictional-current,JUST EAT,-37.20,Eating out,expense,routine,,,false
+0,10,account-fictional-current,TESCO STORES 3412,-134.80,Groceries,expense,routine,,,false
+0,11,account-fictional-current,BUS MOBILE TICKETS,-18.00,Public transport,expense,routine,,,false
+0,12,account-fictional-current,COFFEE HOUSE,-13.60,Coffee,expense,routine,,,false
+0,13,account-fictional-current,TESCO PFS 4632,-79.00,Fuel,expense,routine,,,false
+0,14,account-fictional-current,AMZNMktplace,-48.20,Household essentials,expense,routine,,,false
+0,14,account-fictional-current,JUST EAT,-41.80,Eating out,expense,routine,,,false
+0,15,account-fictional-current,SCHOOL CLUB PAYMENT,-32.00,School and children,expense,routine,,,false

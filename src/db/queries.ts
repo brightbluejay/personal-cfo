@@ -12,6 +12,7 @@ export function getDashboardData() {
         bookedDate: schema.transactions.bookedDate,
         description: schema.transactions.description,
         amountMinor: schema.transactions.amountMinor,
+        movementType: schema.transactions.movementType,
         categoryName: schema.categories.name,
         categoryProvenance: schema.transactions.categoryProvenance,
         categoryConfidence: schema.transactions.categoryConfidence,
@@ -56,7 +57,11 @@ export function getDashboardData() {
 
     const spending = new Map<string, number>();
     for (const transaction of transactionRows) {
-      if (transaction.amountMinor >= 0) continue;
+      if (
+        transaction.amountMinor >= 0 ||
+        transaction.movementType !== "expense"
+      )
+        continue;
       const category = transaction.categoryName ?? "Uncategorised";
       spending.set(
         category,

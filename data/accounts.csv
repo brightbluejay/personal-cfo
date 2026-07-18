@@ -1,0 +1,3 @@
+id,name,type,balance,ownership,role,purpose,envelope_categories
+account-fictional-spending,Groceries and fuel account,current_account,0.00,owned,spending,Groceries and fuel,groceries|fuel
+account-fictional-savings,Savings account,savings,270.00,owned,savings,Cash reserve,

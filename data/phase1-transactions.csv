@@ -1,0 +1,58 @@
+month_offset,day,account_ref,description,amount,category,movement_type,spending_context,counterparty_account_ref,reference
+-3,1,account-fictional-current,Monthly envelope funding,-250.00,Transfers,unknown,routine,account-fictional-spending,envelope-monthly
+-3,1,account-fictional-spending,Monthly envelope funding,250.00,Transfers,unknown,routine,account-fictional-current,envelope-monthly
+-3,2,account-fictional-current,Copper Cup,-5.00,Coffee,expense,routine,,
+-3,5,account-fictional-current,Quick Bite Kitchen,-15.00,Eating out,expense,routine,,
+-3,7,account-fictional-current,Copper Cup,-5.00,Coffee,expense,routine,,
+-3,8,account-fictional-spending,Market basket,-90.00,Groceries,expense,routine,,
+-3,10,account-fictional-spending,Fuel stop,-60.00,Fuel,expense,routine,,
+-3,12,account-fictional-current,Copper Cup,-5.00,Coffee,expense,routine,,
+-3,15,account-fictional-spending,Market basket,-100.00,Groceries,expense,routine,,
+-3,17,account-fictional-current,Copper Cup,-5.00,Coffee,expense,routine,,
+-3,19,account-fictional-current,Quick Bite Kitchen,-15.00,Eating out,expense,routine,,
+-2,1,account-fictional-current,Monthly envelope funding,-250.00,Transfers,unknown,routine,account-fictional-spending,envelope-monthly
+-2,1,account-fictional-spending,Monthly envelope funding,250.00,Transfers,unknown,routine,account-fictional-current,envelope-monthly
+-2,2,account-fictional-current,Copper Cup,-5.00,Coffee,expense,routine,,
+-2,5,account-fictional-current,Quick Bite Kitchen,-15.00,Eating out,expense,routine,,
+-2,7,account-fictional-current,Copper Cup,-5.00,Coffee,expense,routine,,
+-2,8,account-fictional-spending,Market basket,-90.00,Groceries,expense,routine,,
+-2,10,account-fictional-spending,Fuel stop,-60.00,Fuel,expense,routine,,
+-2,12,account-fictional-current,Copper Cup,-5.00,Coffee,expense,routine,,
+-2,15,account-fictional-spending,Market basket,-100.00,Groceries,expense,routine,,
+-2,17,account-fictional-current,Copper Cup,-5.00,Coffee,expense,routine,,
+-2,19,account-fictional-current,Quick Bite Kitchen,-15.00,Eating out,expense,routine,,
+-1,1,account-fictional-current,Monthly envelope funding,-250.00,Transfers,unknown,routine,account-fictional-spending,envelope-monthly
+-1,1,account-fictional-spending,Monthly envelope funding,250.00,Transfers,unknown,routine,account-fictional-current,envelope-monthly
+-1,2,account-fictional-current,Copper Cup,-5.00,Coffee,expense,routine,,
+-1,5,account-fictional-current,Quick Bite Kitchen,-15.00,Eating out,expense,routine,,
+-1,7,account-fictional-current,Copper Cup,-5.00,Coffee,expense,routine,,
+-1,8,account-fictional-spending,Market basket,-90.00,Groceries,expense,routine,,
+-1,10,account-fictional-spending,Fuel stop,-60.00,Fuel,expense,routine,,
+-1,12,account-fictional-current,Copper Cup,-5.00,Coffee,expense,routine,,
+-1,15,account-fictional-spending,Market basket,-100.00,Groceries,expense,routine,,
+-1,17,account-fictional-current,Copper Cup,-5.00,Coffee,expense,routine,,
+-1,19,account-fictional-current,Quick Bite Kitchen,-15.00,Eating out,expense,routine,,
+0,1,account-fictional-current,Monthly envelope funding,-400.00,Transfers,unknown,routine,account-fictional-spending,envelope-current
+0,1,account-fictional-spending,Monthly envelope funding,400.00,Transfers,unknown,routine,account-fictional-current,envelope-current
+0,1,account-fictional-current,Copper Cup,-7.00,Coffee,expense,routine,,
+0,2,account-fictional-current,Auto reserve transfer,-5.00,Savings,savings_transfer,routine,account-fictional-savings,auto-reserve
+0,2,account-fictional-current,Copper Cup,-7.00,Coffee,expense,routine,,
+0,3,account-fictional-current,Quick Bite Kitchen,-20.00,Eating out,expense,routine,,
+0,3,account-fictional-current,Copper Cup,-7.00,Coffee,expense,routine,,
+0,4,account-fictional-current,Reserve transfer,-250.00,Savings,savings_transfer,routine,account-fictional-savings,reserve-allocation
+0,4,account-fictional-current,Copper Cup,-7.00,Coffee,expense,routine,,
+0,5,account-fictional-current,Auto reserve transfer,-7.00,Savings,savings_transfer,routine,account-fictional-savings,auto-reserve
+0,5,account-fictional-current,Copper Cup,-7.00,Coffee,expense,routine,,
+0,5,account-fictional-spending,Market basket,-140.00,Groceries,expense,routine,,
+0,6,account-fictional-current,Copper Cup,-7.00,Coffee,expense,routine,,
+0,6,account-fictional-current,Urgent appliance repair,-180.00,Household essentials,expense,one_off_unavoidable,,
+0,7,account-fictional-current,Quick Bite Kitchen,-20.00,Eating out,expense,routine,,
+0,7,account-fictional-current,Copper Cup,-7.00,Coffee,expense,routine,,
+0,8,account-fictional-current,Auto reserve transfer,-8.00,Savings,savings_transfer,routine,account-fictional-savings,auto-reserve
+0,8,account-fictional-current,Copper Cup,-7.00,Coffee,expense,routine,,
+0,8,account-fictional-spending,Fuel stop,-70.00,Fuel,expense,routine,,
+0,9,account-fictional-spending,Market basket,-110.00,Groceries,expense,routine,,
+0,9,account-fictional-spending,Fuel stop,-80.00,Fuel,expense,routine,,
+0,10,account-fictional-current,Quick Bite Kitchen,-20.00,Eating out,expense,routine,,
+0,11,account-fictional-current,Market basket,-50.00,Groceries,expense,routine,,
+0,12,account-fictional-current,Fuel stop,-36.00,Fuel,expense,routine,,
