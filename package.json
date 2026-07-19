@@ -22,7 +22,10 @@
   "license": "MIT",
   "type": "module",
   "overrides": {
-    "postcss": "8.5.19"
+    "postcss": "8.5.19",
+    "@esbuild-kit/core-utils": {
+      "esbuild": "^0.25.4"
+    }
   },
   "dependencies": {
     "better-sqlite3": "^12.11.1",
@@ -32,6 +35,7 @@
     "openai": "^6.48.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "recharts": "^3.9.2",
     "server-only": "^0.0.1",
     "zod": "^4.4.3"
   },
@@ -42,6 +46,7 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "drizzle-kit": "^0.31.10",
+    "esbuild": "^0.28.1",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.2.10",
     "prettier": "^3.9.5",
@@ -51,7 +56,6 @@
     "vitest": "^4.1.10"
   },
   "allowScripts": {
-    "esbuild@0.18.20": true,
     "esbuild@0.25.12": true,
     "esbuild@0.28.1": true,
     "better-sqlite3@12.11.1": true,

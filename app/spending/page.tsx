@@ -42,7 +42,6 @@ export default function SpendingPage() {
           label="Above recent usual"
           value={formatMoney(cfo.spendingSummary.aboveRecentUsualMinor)}
           detail="Higher routine spending already recorded"
-          tone="rust"
         />
         <StatCard
           label="Still reducible"

@@ -14,7 +14,7 @@ export function PageHeader({
   return (
     <header className="mb-8 flex flex-col gap-5 border-b border-[var(--line)] pb-7 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p className="mb-2 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--rust)]">
+        <p className="mb-2 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
           {eyebrow}
         </p>
         <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">

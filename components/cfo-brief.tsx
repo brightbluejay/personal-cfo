@@ -120,7 +120,7 @@ export function CfoBrief({
         </button>
       </div>
       {response.warning ? (
-        <p className="bg-[var(--rust-pale)] px-5 py-3 text-xs text-[var(--rust)]">
+        <p className="bg-[var(--panel)] px-5 py-3 text-xs text-[var(--muted)]">
           {response.warning}
         </p>
       ) : null}

@@ -1,4 +1,5 @@
 import { CfoBrief } from "@/components/cfo-brief";
+import { PlanCompositionChart } from "@/components/plan-composition-chart";
 import { ScenarioSimulator } from "@/components/scenario-simulator";
 import {
   EmptyState,
@@ -13,7 +14,9 @@ import { formatDate, formatMoney, formatMonth } from "@/src/lib/format";
 export const dynamic = "force-dynamic";
 
 function stageLabel(value: string) {
-  return value.replaceAll("_", " ");
+  return value === "structurally_balanced"
+    ? "Plan balances the month"
+    : "Plan still leaves a monthly gap";
 }
 
 function coverage(value: number) {
@@ -52,7 +55,11 @@ export default function MonthlyReviewPage() {
         title="Your Action Plan"
         description="Separate the immediate timing gap from the repeatable monthly cycle. Code protects required payments, funds irregular costs once, and keeps the one-off backlog out of the monthly target."
         action={
-          <StatusPill tone="warn">{stageLabel(actions.status)}</StatusPill>
+          <StatusPill
+            tone={actions.status === "structurally_balanced" ? "good" : "warn"}
+          >
+            {stageLabel(actions.status)}
+          </StatusPill>
         }
       />
 
@@ -93,6 +100,17 @@ export default function MonthlyReviewPage() {
         </SectionCard>
 
         <SectionCard title="Monthly cycle" eyebrow="Recurring flow">
+          <PlanCompositionChart
+            redirectedMinor={actions.redirectedExistingAllocationMinor}
+            reductionsMinor={actions.grossMonthlyReductionsMinor}
+            existingGapMinor={
+              flow.existingRecurringGapBeforeIrregularCostsMinor
+            }
+            surpriseCostPotMinor={
+              plan.irregularCostAllocation.monthlyAllocationMinor
+            }
+            surplusMinor={Math.max(0, actions.balanceAfterPlanMinor)}
+          />
           <div className="grid gap-px bg-[var(--line)] sm:grid-cols-2 lg:grid-cols-4">
             {[
               ["Normal monthly income", flow.normalisedMonthlyIncomeMinor],
@@ -119,7 +137,9 @@ export default function MonthlyReviewPage() {
             ].map(([label, value]) => (
               <div key={String(label)} className="bg-white p-5">
                 <p className="text-xs text-[var(--faint)]">{label}</p>
-                <p className="mt-2 font-mono text-lg font-semibold">
+                <p
+                  className={`mt-2 font-mono font-semibold ${label === "Monthly surplus" ? "text-2xl text-[var(--sage-dark)]" : "text-lg"}`}
+                >
                   {formatMoney(Number(value))}
                 </p>
               </div>
@@ -131,8 +151,8 @@ export default function MonthlyReviewPage() {
               month short by{" "}
               {formatMoney(flow.fullyFundedRecurringGapBeforePlanMinor)}. The
               plan redirects{" "}
-              {formatMoney(actions.redirectedExistingAllocationMinor)}
-              already leaving for ordinary savings, newly sets aside only{" "}
+              {formatMoney(actions.redirectedExistingAllocationMinor)} already
+              leaving for ordinary savings, newly sets aside only{" "}
               {formatMoney(actions.newlyFundedAllocationsMinor)}, and stops or
               reduces {formatMoney(actions.grossMonthlyReductionsMinor)} of
               other monthly spending.
@@ -180,6 +200,7 @@ export default function MonthlyReviewPage() {
         <SectionCard
           title="Corrected monthly plan"
           eyebrow="One redirect plus five spending changes"
+          className="border-[var(--sage)]"
         >
           <div className="grid gap-px border-b border-[var(--line)] bg-[var(--line)] sm:grid-cols-3">
             {[
@@ -287,7 +308,7 @@ export default function MonthlyReviewPage() {
                     monthly spending.
                   </p>
                 </div>
-                <p className="font-mono text-sm font-semibold text-[var(--rust)]">
+                <p className="font-mono text-sm font-semibold text-[var(--ink)]">
                   +{formatMoney(actions.newlyFundedAllocationsMinor)}/month
                 </p>
               </div>
@@ -354,14 +375,14 @@ export default function MonthlyReviewPage() {
                       .
                     </p>
                   </div>
-                  <p className="text-xs font-semibold text-[var(--rust)]">
+                  <p className="text-lg font-semibold tracking-[-0.02em] text-[var(--sage-dark)]">
                     {milestone.estimatedDate
                       ? formatDate(milestone.estimatedDate)
                       : "No supported date"}
                   </p>
                 </div>
                 {milestone.limitation ? (
-                  <p className="mt-2 text-xs leading-5 text-[var(--rust)]">
+                  <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
                     {milestone.limitation}
                   </p>
                 ) : null}

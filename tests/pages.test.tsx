@@ -14,7 +14,8 @@ import TransactionsPage from "../app/transactions/page";
 import { seedDatabase } from "../src/db/seed";
 import { getCfoWorkspace } from "../src/db/cfo-query";
 import { buildFallbackNarrative } from "../src/domain/cfo/narrative-output";
-import { formatMoney } from "../src/lib/format";
+import { projectDebtPayoff } from "../src/domain/cfo/debt-projection";
+import { formatDate, formatMoney } from "../src/lib/format";
 import { writeCachedNarrative } from "../src/server/narrative-cache";
 import * as schema from "../src/db/schema";
 
@@ -71,6 +72,9 @@ describe("seeded dashboard pages", () => {
     expect(actionPlan).toContain("Monthly cycle");
     expect(actionPlan).toContain("Corrected monthly plan");
     expect(actionPlan).toContain("One-off backlog");
+    expect(actionPlan).toContain("Plan balances the month");
+    expect(actionPlan).not.toContain(">structurally balanced<");
+    expect(actionPlan).toContain("Monthly plan composition");
     expect(actionPlan).toContain(
       formatMoney(cfo!.breakCyclePlan.backlog.remainingBacklogMinor),
     );
@@ -152,6 +156,32 @@ describe("seeded dashboard pages", () => {
         income.safetyCushionAllocationMinor +
         income.genuinelyUnallocatedMinor,
     ).toBe(income.amountMinor);
+  });
+
+  it("renders the delayed optional-overpayment route from canonical projections", () => {
+    const cfo = getCfoWorkspace()!;
+    const debtEffect = cfo.breakCyclePlan.debtEffect;
+    const planProjection = projectDebtPayoff({
+      debts: cfo.debtRecords,
+      asOfDate: cfo.forecast.asOfDate,
+      monthlyExtraPaymentMinor: debtEffect.safeOptionalPaymentMinor,
+      extraPaymentStartDate: debtEffect.optionalOverpaymentStartDate,
+    });
+    const html = renderToStaticMarkup(<DebtsPage />);
+    expect(html).toContain("What-if comparison");
+    expect(html).toContain("This is not the current Action Plan route");
+    expect(html).not.toContain("Once cash flow is healthy");
+    expect(html).toContain(formatDate(debtEffect.currentDebtFreeDate));
+    expect(html).toContain(formatDate(debtEffect.revisedDebtFreeDate));
+    expect(html).toContain(
+      `${cfo.debtTrajectory.currentPlan.monthsToPayoff! - planProjection.monthsToPayoff!} months`,
+    );
+    expect(html).toContain(
+      formatMoney(
+        cfo.debtTrajectory.currentPlan.totalInterestMinor -
+          planProjection.totalInterestMinor,
+      ),
+    );
   });
 
   it("does not expose internal provenance or contradictory cushion language", () => {

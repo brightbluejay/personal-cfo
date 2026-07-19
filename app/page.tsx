@@ -1,5 +1,10 @@
 import { CfoBrief } from "@/components/cfo-brief";
 import {
+  CashJourneyChart,
+  type CashJourneyKeyPoint,
+  type CashJourneyPoint,
+} from "@/components/cash-journey-chart";
+import {
   EmptyState,
   PageHeader,
   SectionCard,
@@ -7,6 +12,7 @@ import {
   StatusPill,
 } from "@/components/ui";
 import { getCfoWorkspace } from "@/src/db/cfo-query";
+import type { CashForecast } from "@/src/domain/cfo/forecast";
 import { buildFallbackNarrative } from "@/src/domain/cfo/narrative-output";
 import { formatDate, formatMoney, formatMonth } from "@/src/lib/format";
 
@@ -14,6 +20,40 @@ export const dynamic = "force-dynamic";
 
 function healthLabel(value: string) {
   return value.replaceAll("_", " ");
+}
+
+function addDay(value: string) {
+  const date = new Date(`${value}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + 1);
+  return date.toISOString().slice(0, 10);
+}
+
+function buildCashJourneyPoints(forecast: CashForecast): CashJourneyPoint[] {
+  const changesByDate = new Map<string, number>();
+  for (const event of forecast.events) {
+    changesByDate.set(
+      event.date,
+      (changesByDate.get(event.date) ?? 0) + event.amountMinor,
+    );
+  }
+  const points: CashJourneyPoint[] = [];
+  let balanceMinor = forecast.accessibleCashMinor;
+  for (
+    let date = forecast.asOfDate;
+    date <= forecast.monthEndDate;
+    date = addDay(date)
+  ) {
+    if (date !== forecast.asOfDate) {
+      balanceMinor += changesByDate.get(date) ?? 0;
+    }
+    points.push({
+      date,
+      balanceMinor,
+      positiveBalanceMinor: Math.max(0, balanceMinor),
+      negativeBalanceMinor: Math.min(0, balanceMinor),
+    });
+  }
+  return points;
 }
 
 export default function OverviewPage() {
@@ -65,6 +105,36 @@ export default function OverviewPage() {
         ["Genuinely unallocated", nextIncome.genuinelyUnallocatedMinor],
       ] as const)
     : [];
+  const cashJourneyKeyPoints: CashJourneyKeyPoint[] = [
+    {
+      label: "Current",
+      date: forecast.asOfDate,
+      balanceMinor: forecast.accessibleCashMinor,
+      labelPosition: "top",
+    },
+    {
+      label: "Low",
+      date: forecast.lowestProjectedBalanceDate,
+      balanceMinor: forecast.lowestProjectedBalanceMinor,
+      labelPosition: "bottom",
+    },
+    ...(nextIncome
+      ? [
+          {
+            label: `After ${incomeName}`,
+            date: nextIncome.date,
+            balanceMinor: nextIncome.balanceAfterMinor,
+            labelPosition: "top" as const,
+          },
+        ]
+      : []),
+    {
+      label: "Month end",
+      date: forecast.monthEndDate,
+      balanceMinor: forecast.projectedMonthEndBalanceMinor,
+      labelPosition: "top",
+    },
+  ];
   return (
     <>
       <PageHeader
@@ -108,6 +178,10 @@ export default function OverviewPage() {
         eyebrow="Dated cash journey"
         className="mt-6"
       >
+        <CashJourneyChart
+          points={buildCashJourneyPoints(forecast)}
+          keyPoints={cashJourneyKeyPoints}
+        />
         <div className="grid gap-px bg-[var(--line)] md:grid-cols-4">
           <div className="bg-white p-5">
             <p className="text-xs text-[var(--faint)]">
@@ -197,7 +271,7 @@ export default function OverviewPage() {
             ))}
           </div>
         </SectionCard>
-        <SectionCard title="What to do now">
+        <SectionCard title="What to do now" className="border-[var(--sage)]">
           <div className="divide-y divide-[var(--line)]">
             {cfo.recovery.actions.map((action) => (
               <div key={action.id} className="px-5 py-4">
