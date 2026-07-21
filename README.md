@@ -164,6 +164,31 @@ The conservative Python report generator remains in `scripts/` as historical ref
 
 The project uses the [MIT Licence](LICENSE). It permits use, modification, redistribution, and commercial reuse when the licence and copyright notice are retained. It provides no warranty and does not require derivative projects to publish their source.
 
+## How Codex accelerated development
+
+Codex accelerated implementation and verification in the primary Build Week thread:
+
+- verified the WSL environment and installed the local Node.js toolchain;
+- built the Next.js, Tailwind, Drizzle, SQLite, migration, seed, test, and dashboard foundation;
+- translated iterative product-owner reviews into focused corrections without recreating completed work;
+- diagnosed forecast inconsistencies, cache behaviour, validator failures, and dependency issues;
+- implemented the canonical fact boundary, optional GPT-5.6 narratives, strict validation, and local caching;
+- expanded deterministic regression coverage as the cash-flow and debt-planning model evolved;
+- kept implementation workspace-scoped, public-safe, and backed by honest Build Week records.
+
+## Key design decisions
+
+I made the project's core product and architecture decisions; Codex accelerated their implementation:
+
+- keep the application local-first, credential-free in demo mode, and backed by an ignored SQLite database;
+- make deterministic code calculate every financial result while GPT interprets and the user decides;
+- derive every route from one dated canonical CFO result so balances, actions, and milestones stay consistent;
+- seed only committed fictional CSV fixtures and keep private data, credentials, and generated databases out of Git;
+- treat transfers, savings allocations, and funding envelopes explicitly rather than as income or consumption;
+- separate normal-month cash flow from the one-off recovery backlog and always protect required debt payments;
+- make GPT-5.6 optional, fact-referenced, strictly validated, locally cached, and replaceable by deterministic fallbacks;
+- defer user-data ingestion, Open Banking, cloud services, accounts, and payment initiation beyond the submission scope.
+
 ## Build Week evidence
 
 Verified work, human decisions, test evidence, and Codex collaboration notes live in `docs/build-week/`. A `/feedback` session identifier must be collected manually and is never fabricated.

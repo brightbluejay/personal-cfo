@@ -7,6 +7,7 @@ import {
   buildFallbackNarrative,
   NARRATIVE_PROMPT_VERSION,
   NARRATIVE_SCHEMA_VERSION,
+  NarrativeValidationError,
   narrativeTypeSchema,
   validateNarrativeResponse,
 } from "@/src/domain/cfo/narrative-output";
@@ -20,6 +21,7 @@ import {
   readCachedNarrative,
   writeCachedNarrative,
 } from "@/src/server/narrative-cache";
+import { sanitisedNarrativeValidationLog } from "@/src/server/narrative-validation-log";
 
 const requestSchema = z
   .object({
@@ -162,7 +164,18 @@ export async function POST(request: Request) {
       ...responseMeta,
       model: generated.model,
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof NarrativeValidationError) {
+      console.error(
+        JSON.stringify(
+          sanitisedNarrativeValidationLog({
+            route: "/api/cfo-brief",
+            narrativeType: type,
+            error,
+          }),
+        ),
+      );
+    }
     return NextResponse.json({
       status: "fallback" as const,
       label: labels.fallback,

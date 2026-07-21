@@ -18,6 +18,8 @@ import type {
   CfoNarrativeFactPackage,
   NarrativeFact,
 } from "../src/domain/cfo/narrative-facts";
+import { factsForView } from "../src/domain/cfo/narrative-facts";
+import { projectFactsForModel } from "../src/server/openai/client";
 import {
   narrativeCacheKey,
   readCachedNarrative,
@@ -116,6 +118,53 @@ describe("canonical narrative fact package", () => {
     const second = getCfoWorkspace()!;
     expect(second.narrativeFacts).toEqual(first.narrativeFacts);
     expect(second.forecast).toEqual(first.forecast);
+  });
+
+  it("sanitises only the model-facing Overview wording", () => {
+    const packageValue = getCfoWorkspace()!.narrativeFacts;
+    const canonicalBefore = structuredClone(packageValue);
+    const canonicalNow = factsForView(packageValue, "overviewFacts").find(
+      (fact) => fact.id === "milestone.now",
+    );
+    const canonicalMilestone = factsForView(packageValue, "overviewFacts").find(
+      (fact) => fact.id === "recovery.milestone.finish_above_zero",
+    );
+
+    const overviewProjection = projectFactsForModel(
+      packageValue,
+      "overviewFacts",
+    );
+    const projectedNow = overviewProjection.find(
+      (fact) => fact.id === "milestone.now",
+    );
+    const projectedMilestone = overviewProjection.find(
+      (fact) => fact.id === "recovery.milestone.finish_above_zero",
+    );
+    const actionPlanProjection = projectFactsForModel(
+      packageValue,
+      "actionPlanFacts",
+    );
+    const actionPlanMilestone = actionPlanProjection.find(
+      (fact) => fact.id === "recovery.milestone.finish_above_zero",
+    );
+
+    expect(canonicalNow?.values.delayReason).toBe(
+      "The recorded actions do not fully close the pre-income cash gap.",
+    );
+    expect(canonicalMilestone?.values.assumptions).toContain(
+      "Recorded promotional-rate expiries remain in force: 2027-01-31.",
+    );
+    expect(projectedNow?.values.delayReason).toBe(
+      "The current actions do not fully close the pre-income cash gap.",
+    );
+    expect(projectedMilestone?.values.assumptions).toContain(
+      "Known promotional-rate expiries remain in force: 2027-01-31.",
+    );
+    expect(JSON.stringify(overviewProjection)).not.toMatch(/\brecorded\b/i);
+    expect(actionPlanMilestone?.values.assumptions).toContain(
+      "Recorded promotional-rate expiries remain in force: 2027-01-31.",
+    );
+    expect(packageValue).toEqual(canonicalBefore);
   });
 
   it("uses exactly three complete comparison months and preserves the approved forecast", () => {

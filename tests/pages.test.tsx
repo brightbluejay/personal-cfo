@@ -13,10 +13,15 @@ import SpendingPage from "../app/spending/page";
 import TransactionsPage from "../app/transactions/page";
 import { seedDatabase } from "../src/db/seed";
 import { getCfoWorkspace } from "../src/db/cfo-query";
-import { buildFallbackNarrative } from "../src/domain/cfo/narrative-output";
+import {
+  auditNarrativeResponse,
+  buildFallbackNarrative,
+  NarrativeValidationError,
+} from "../src/domain/cfo/narrative-output";
 import { projectDebtPayoff } from "../src/domain/cfo/debt-projection";
 import { formatDate, formatMoney } from "../src/lib/format";
 import { writeCachedNarrative } from "../src/server/narrative-cache";
+import { sanitisedNarrativeValidationLog } from "../src/server/narrative-validation-log";
 import * as schema from "../src/db/schema";
 
 const databaseRelativePath = "./data/page-render-test.db";
@@ -101,6 +106,43 @@ describe("seeded dashboard pages", () => {
     expect(body.status).toBe("fallback");
     expect(body.label).toContain("AI interpretation is unavailable");
     expect(body.narrative.headline.factIds.length).toBeGreaterThan(0);
+  });
+
+  it("logs only sanitised narrative validation metadata", () => {
+    const cfo = getCfoWorkspace()!;
+    const invalid = buildFallbackNarrative(cfo.narrativeFacts, "cfo_brief");
+    invalid.headline.text =
+      "The recorded plan contains private-diagnostic-sentinel.";
+    const audit = auditNarrativeResponse({
+      packageValue: cfo.narrativeFacts,
+      type: "cfo_brief",
+      response: invalid,
+    });
+    expect(audit.valid).toBe(false);
+    if (audit.valid) throw new Error("Expected narrative validation failure.");
+
+    const log = sanitisedNarrativeValidationLog({
+      route: "/api/cfo-brief",
+      narrativeType: "cfo_brief",
+      error: new NarrativeValidationError(audit.issues),
+    });
+    const serialised = JSON.stringify(log);
+    expect(log).toEqual({
+      event: "narrative_validation_failed",
+      route: "/api/cfo-brief",
+      narrativeType: "cfo_brief",
+      issues: expect.arrayContaining([
+        {
+          field: "headline.text",
+          validationStage: "banned_word",
+          validationCategory: "banned-word hit",
+        },
+      ]),
+    });
+    expect(serialised).not.toContain("private-diagnostic-sentinel");
+    expect(serialised).not.toContain("recorded plan");
+    expect(serialised).not.toContain("rejectedTextSnippet");
+    expect(serialised).not.toContain("referencedFactIds");
   });
 
   it("returns a validated cache entry even when the client requests a refresh", async () => {

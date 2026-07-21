@@ -42,37 +42,59 @@ function formatModelNumber(
   return value;
 }
 
-function factsForModel(
+function preserveInitialCase(match: string, replacement: string) {
+  return /^\p{Lu}/u.test(match)
+    ? `${replacement[0].toUpperCase()}${replacement.slice(1)}`
+    : replacement;
+}
+
+function sanitiseOverviewModelWording(value: string) {
+  return value
+    .replace(/\brecorded actions\b/giu, (match) =>
+      preserveInitialCase(match, "current actions"),
+    )
+    .replace(/\brecorded promotional-rate expiries\b/giu, (match) =>
+      preserveInitialCase(match, "known promotional-rate expiries"),
+    )
+    .replace(/\brecorded\b/giu, (match) => preserveInitialCase(match, "known"));
+}
+
+export function projectFactsForModel(
   packageValue: CfoNarrativeFactPackage,
   view: "overviewFacts" | "actionPlanFacts",
 ) {
-  return factsForView(packageValue, view).map((fact) => ({
-    ...fact,
-    values: Object.fromEntries(
-      Object.entries(fact.values).map(([key, raw]) => [
-        key,
-        Array.isArray(raw)
-          ? raw.map((value) =>
-              typeof value === "number"
-                ? formatModelNumber(key, value, {
-                    preservePennies:
-                      fact.type === "subscription" ||
-                      (fact.type === "selected_recurring_change" &&
-                        fact.values.kind === "subscription"),
-                  })
-                : value,
-            )
-          : typeof raw === "number"
-            ? formatModelNumber(key, raw, {
-                preservePennies:
-                  fact.type === "subscription" ||
-                  (fact.type === "selected_recurring_change" &&
-                    fact.values.kind === "subscription"),
-              })
-            : raw,
-      ]),
-    ),
-  }));
+  const sanitiseWording =
+    view === "overviewFacts"
+      ? sanitiseOverviewModelWording
+      : (value: string) => value;
+  return factsForView(packageValue, view).map((fact) => {
+    const preservePennies =
+      fact.type === "subscription" ||
+      (fact.type === "selected_recurring_change" &&
+        fact.values.kind === "subscription");
+    return {
+      ...fact,
+      label: sanitiseWording(fact.label),
+      values: Object.fromEntries(
+        Object.entries(fact.values).map(([key, raw]) => [
+          key,
+          Array.isArray(raw)
+            ? raw.map((value) =>
+                typeof value === "number"
+                  ? formatModelNumber(key, value, { preservePennies })
+                  : typeof value === "string"
+                    ? sanitiseWording(value)
+                    : value,
+              )
+            : typeof raw === "number"
+              ? formatModelNumber(key, raw, { preservePennies })
+              : typeof raw === "string"
+                ? sanitiseWording(raw)
+                : raw,
+        ]),
+      ),
+    };
+  });
 }
 
 export class NarrativeGenerationError extends Error {
@@ -104,7 +126,7 @@ export async function generateNarrative(input: {
   if (!apiKey) throw new Error("OPENAI_API_KEY is not configured.");
   const model = configuredOpenAiModel();
   const view = input.type === "cfo_brief" ? "overviewFacts" : "actionPlanFacts";
-  const facts = factsForModel(input.packageValue, view);
+  const facts = projectFactsForModel(input.packageValue, view);
   const evidenceIds = new Set(facts.flatMap((fact) => fact.evidenceIds));
   const payload = {
     metadata: {
